@@ -92,6 +92,20 @@
                     </select>
                 </div>
                 
+                <!-- NEW: Words per sentence -->
+                <div class="mb-3">
+                    <label for="wordsPerSentence" class="form-label">Words per sentence (optional):</label>
+                    <select id="wordsPerSentence" class="form-select">
+                        <option value="">Not specified</option>
+                        <option>3 to 5</option>
+                        <option>3 to 6</option>
+                        <option>3 to 7</option>
+                        <option>4 to 7</option>
+                        <option>4 to 8</option>
+                        <option>free</option>
+                    </select>
+                </div>
+                
                 <!-- Vocabulary count -->
                 <div class="mb-3">
                     <label for="vocabCount" class="form-label">Number of vocabulary items: <span id="vocabValue">8</span></label>
@@ -171,6 +185,7 @@
                 length = document.getElementById('customLength').value + ' words';
             }
             const tone = document.getElementById('tone').value;
+            const wordsPerSentence = document.getElementById('wordsPerSentence').value;
             const vocabCount = document.getElementById('vocabCount').value;
             const tfCount = document.getElementById('tfCount').value;
             const mcCount = document.getElementById('mcCount').value;
@@ -190,8 +205,13 @@
             }
             
             prompt += `\n**Length:** ${length}
-**Tone:** ${tone}
+**Tone:** ${tone}`;
 
+            if (wordsPerSentence) {
+                prompt += `\n**Words per sentence:** ${wordsPerSentence}`;
+            }
+
+            prompt += `\n
 Please generate an engaging English reading passage based on the specifications above. The passage should:
 
 1. Be appropriate for ${level} English language learners
@@ -199,22 +219,34 @@ Please generate an engaging English reading passage based on the specifications 
 3. Use a ${tone.toLowerCase()} tone throughout
 4. Focus on the theme of ${theme}`;
 
+            if (wordsPerSentence && wordsPerSentence !== 'free') {
+                prompt += `\n5. Use sentences with ${wordsPerSentence} words per sentence`;
+            }
+
+            let nextPoint = wordsPerSentence ? 6 : 5;
+
             if (topic) {
-                prompt += `\n5. Address the specific topic/title: "${topic}"`;
+                prompt += `\n${nextPoint}. Address the specific topic/title: "${topic}"`;
+                nextPoint++;
             }
             
             if (description) {
-                prompt += `\n6. Incorporate the following description/context: "${description}"`;
+                prompt += `\n${nextPoint}. Incorporate the following description/context: "${description}"`;
             }
             
             prompt += `\n
 Additionally, please include:
 
-- A glossary of ${vocabCount} key vocabulary items from the passage with definitions
+- A vocabulary list of ${vocabCount} key words from the passage in this format:
+  "word: (part of speech) meaning in English, meaning in Korean"
+  Example:
+  rudimentary: (adj) basic or elementary in development, 기초적인
+  electromagnetic radiation: (n) energy that travels in waves, including visible light, radio waves, and X-rays, 전자기 방사
+
 - ${tfCount} True/False questions based on the passage content (with answers provided at the end of all quizzes)
 - ${mcCount} Multiple Choice questions with 4 options each (with answers provided at the end of all quizzes)
 
-Format the response with clear section headings for the passage, glossary, and each quiz type.`;
+Format the response with clear section headings for the passage, vocabulary list, and each quiz type.`;
             
             // Display the prompt
             document.getElementById('promptDisplay').innerHTML = prompt.replace(/\n/g, '<br>');
